@@ -15,7 +15,7 @@
 
 	<name>libmetrics</name>
 	<url>https://www.mclarkdev.com/tools/libmetrics</url>
-	<description>An generic metrics cache for collecting various system counters.</description>
+	<description>A generic metrics cache.</description>
 
 	<scm>
 		<url>https://git.mclarkdev.com/MClarkDev.com--Public/LibMetrics.git</url>
