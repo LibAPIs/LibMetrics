@@ -1,14 +1,17 @@
 package com.mclarkdev.tools.libmetrics;
 
+import java.util.HashMap;
+
 import org.json.JSONObject;;
 
 public class LibMetrics {
 
-	private static LibMetrics statsCollector;
+	private static final HashMap<String, LibMetrics> caches = new HashMap<>();
 
-	private final JSONObject counterCache = new JSONObject();
+	private final JSONObject counterCache;
 
 	private LibMetrics() {
+		counterCache = new JSONObject();
 	}
 
 	/**
@@ -108,16 +111,34 @@ public class LibMetrics {
 	}
 
 	/**
-	 * Get a reference to the shared statistics collector.
+	 * Hit a run counter for the method currently being executed.
+	 */
+	public static void hitMethodRunCounter() {
+		StackTraceElement e = new Throwable().getStackTrace()[1];
+		String[] classes = (e.getClassName() + "." + e.getMethodName()).split("\\.");
+		instance("methods").hitCounter(classes);
+	}
+
+	/**
+	 * Get a reference to the default metrics collector.
 	 * 
 	 * @return
 	 */
-	public static synchronized LibMetrics instance() {
+	public static LibMetrics instance() {
+		return instance(null);
+	}
 
-		if (statsCollector == null) {
+	/**
+	 * Get a reference to a named metrics collector.
+	 * 
+	 * @return
+	 */
+	public static synchronized LibMetrics instance(String cache) {
+		cache = (cache != null) ? cache : "default";
 
-			statsCollector = new LibMetrics();
+		if (!caches.containsKey(cache)) {
+			caches.put(cache, new LibMetrics());
 		}
-		return statsCollector;
+		return caches.get(cache);
 	}
 }
