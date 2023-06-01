@@ -29,6 +29,9 @@ public class LibMetrics {
 	 * @param name
 	 */
 	public void hitCounter(double count, String... name) {
+		if (name == null) {
+			throw new IllegalArgumentException("name cannot be null");
+		}
 
 		synchronized (counterCache) {
 
@@ -57,6 +60,9 @@ public class LibMetrics {
 	 * @return
 	 */
 	public double getCounter(String... name) {
+		if (name == null) {
+			throw new IllegalArgumentException("name cannot be null");
+		}
 
 		JSONObject outer = counterCache;
 		for (String key : name) {
@@ -80,6 +86,9 @@ public class LibMetrics {
 	 * @param value
 	 */
 	public void setValue(Object value, String... name) {
+		if (name == null) {
+			throw new IllegalArgumentException("name cannot be null");
+		}
 
 		synchronized (counterCache) {
 
@@ -97,6 +106,38 @@ public class LibMetrics {
 
 			String key = name[name.length - 1];
 			outer.put(key, value);
+		}
+	}
+
+	/**
+	 * Delete a whole node from the metrics tree.
+	 * 
+	 * @param node
+	 * @return
+	 */
+	public boolean deleteNode(String... node) {
+		if (node == null) {
+			throw new IllegalArgumentException("node cannot be null");
+		}
+
+		synchronized (counterCache) {
+
+			JSONObject outer = counterCache;
+			for (int x = 0; x < node.length - 1; x++) {
+
+				JSONObject inner = outer.optJSONObject(node[x]);
+				if (inner == null) {
+
+					inner = new JSONObject();
+					outer.put(node[x], inner);
+				}
+				outer = inner;
+			}
+
+			// Remove and return success
+			String rem = node[node.length - 1];
+			Object o = outer.remove(rem);
+			return (o != null);
 		}
 	}
 
