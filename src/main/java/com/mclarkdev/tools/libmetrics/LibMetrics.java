@@ -4,6 +4,11 @@ import java.util.HashMap;
 
 import org.json.JSONObject;;
 
+/**
+ * LibMetrics // LibMetrics
+ *
+ * A simple java helper library for collecting application runtime metrics.
+ */
 public class LibMetrics {
 
 	private static final HashMap<String, LibMetrics> caches = new HashMap<>();
