@@ -15,7 +15,7 @@
 	<url>https://git.mclarkdev.com/LibAPIs/LibMetrics.git</url>
 	<description>A simple java helper library for collecting application runtime metrics.</description>
 
-	<licenses>
+	<licenses> 
 		<license>
 			<name>Apache License, Version 2.0</name>
 			<url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
