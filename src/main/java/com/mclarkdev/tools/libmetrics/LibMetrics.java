@@ -1,6 +1,10 @@
 package com.mclarkdev.tools.libmetrics;
 
+import java.lang.Thread.State;
+import java.lang.management.GarbageCollectorMXBean;
+import java.lang.management.ManagementFactory;
 import java.util.HashMap;
+import java.util.Set;
 
 import org.json.JSONObject;;
 
@@ -163,6 +167,61 @@ public class LibMetrics {
 		StackTraceElement e = new Throwable().getStackTrace()[1];
 		String[] classes = (e.getClassName() + "." + e.getMethodName()).split("\\.");
 		instance("methods").hitCounter(classes);
+	}
+
+	/**
+	 * Update system metrics.
+	 */
+	public static void updateSystemMetrics() {
+
+		// Update system runtime statistics
+		Runtime runtime = Runtime.getRuntime();
+		long uptime = ManagementFactory.getRuntimeMXBean().getUptime();
+
+		// Current time
+		instance("jvm").setValue(System.currentTimeMillis(), "system", "time", "now");
+		instance("jvm").setValue(uptime, "system", "time", "running");
+
+		// Get and update JVM memory used
+		double memUsed = (double) (runtime.totalMemory() - runtime.freeMemory());
+		instance("jvm").setValue(memUsed, "system", "jvm", "memory", "used");
+
+		// Get and update JVM memory free
+		double memFree = (double) (runtime.freeMemory());
+		instance("jvm").setValue(memFree, "system", "jvm", "memory", "free");
+
+		// Get and update JVM memory total
+		double memTotal = (double) (runtime.totalMemory());
+		instance("jvm").setValue(memTotal, "system", "jvm", "memory", "total");
+
+		// Get and update JVM memory max
+		double memMax = (double) (runtime.maxMemory());
+		instance("jvm").setValue(memMax, "system", "jvm", "memory", "max");
+
+		// Update JVM garbage collection statistics
+		for (GarbageCollectorMXBean gc : ManagementFactory.getGarbageCollectorMXBeans()) {
+
+			String name = gc.getName().replace(" ", "_");
+			instance("jvm").setValue(gc.getCollectionCount(), "system", "jvm", "gc", name, "count");
+			instance("jvm").setValue(gc.getCollectionTime(), "system", "jvm", "gc", name, "time");
+		}
+
+		// Update JVM thread statistics
+		Set<Thread> threadSet = Thread.getAllStackTraces().keySet();
+		Thread[] threads = threadSet.toArray(new Thread[threadSet.size()]);
+		instance("jvm").setValue(threads.length, "system", "jvm", "threads", "count");
+
+		// Get the state of each thread
+		HashMap<State, Integer> threadStates = new HashMap<>();
+		for (Thread thread : threads) {
+			int current = threadStates.getOrDefault(thread.getState(), 0);
+			threadStates.put(thread.getState(), current + 1);
+		}
+
+		// Update thread state counters
+		for (State state : threadStates.keySet()) {
+			instance("jvm").setValue(threadStates.get(state), "system", "jvm", "threads", "state", state.toString());
+		}
 	}
 
 	/**
